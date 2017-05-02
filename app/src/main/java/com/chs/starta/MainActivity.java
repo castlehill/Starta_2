@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,12 +13,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button b;
-private Context c;
+    private Context c;
+    private TextView textview;
+    CountDownTimer countdowntimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,26 +38,35 @@ private Context c;
             }
         });
 
+        textview = (TextView) findViewById(R.id.editText);
         b = (Button) findViewById(R.id.mybutton);
 
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(c, "dfdfdfdfdf" , Toast.LENGTH_SHORT).show();
-                startRecording();
+
+                int iMills = 10000;
+                iMills = Integer.parseInt( textview.getText().toString()) * 1000;
+                countdowntimer = new CountDownTimerClass(iMills , 1000);
+
+                countdowntimer.start();
+
+
             }
         });
 
     }
 
-    private void startRecording( ) {
-    //call out to app
+
+    private void startRecording() {
+        //call out to app
         Intent intent = new Intent(Intent.ACTION_RUN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         intent.setData(Uri.parse("http://strava.com/nfc/record"));
         startActivity(intent);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -75,5 +87,31 @@ private Context c;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public class CountDownTimerClass extends CountDownTimer {
+
+        public CountDownTimerClass(long millisInFuture, long countDownInterval) {
+
+            super(millisInFuture, countDownInterval);
+
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+            int progress = (int) (millisUntilFinished / 1000);
+
+            textview.setText(Integer.toString(progress));
+
+        }
+
+        @Override
+        public void onFinish() {
+            startRecording();
+            textview.setText(" Count Down Finish ");
+
+        }
     }
 }

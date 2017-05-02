@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,11 +16,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
 
     private Button b;
     private Context c;
     private TextView textview;
+    private TextToSpeech  engine=null;
+
     CountDownTimer countdowntimer;
 
     @Override
@@ -55,11 +60,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        engine = new TextToSpeech(this, this);
+            engine.setLanguage(Locale.UK);
+
+
     }
 
 
     private void startRecording() {
         //call out to app
+        if (engine!=null) {
+        engine.speak("Recording started!", TextToSpeech.QUEUE_FLUSH,null,null);
+        }
         Intent intent = new Intent(Intent.ACTION_RUN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -87,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onInit(int status) {
+
+
     }
 
 

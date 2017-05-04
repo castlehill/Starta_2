@@ -8,6 +8,7 @@ import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -25,6 +26,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private TextView textview;
     private TextToSpeech  engine=null;
 
+//NumberPicker np =null;
+  //  NumberPicker numberPicker = null;
+    com.shawnlin.numberpicker.NumberPicker numberPicker=null;
     CountDownTimer countdowntimer;
 
     @Override
@@ -43,16 +47,42 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         });
 
-        textview = (TextView) findViewById(R.id.editText);
+
+
+
+
+        numberPicker = (com.shawnlin.numberpicker.NumberPicker)  findViewById(R.id.number_picker);
+// set selected text color
+        numberPicker.setSelectedTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        numberPicker.setSelectedTextColorResource(R.color.colorPrimary);
+
+        numberPicker.setMinValue(0);
+        numberPicker.setMaxValue(20);
+        numberPicker.setWrapSelectorWheel(true);
+
+        engine = new TextToSpeech(this, this);
+        engine.setLanguage(Locale.UK);
+
+        textview = (TextView) findViewById(R.id.tvUpdate);
         b = (Button) findViewById(R.id.mybutton);
 
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (countdowntimer!=null) {
+                    countdowntimer.cancel();
+                }
 
                 int iMills = 10000;
-                iMills = Integer.parseInt( textview.getText().toString()) * 1000;
+                //iMills = Integer.parseInt( textview.getText().toString()) * 1000;
+
+                int iSelected = numberPicker.getValue();
+                //convert to minutes
+                    iMills=  iSelected  * 60 * 1000;
+
                 countdowntimer = new CountDownTimerClass(iMills , 1000);
+
+                engine.speak("Countdown set for " +  (iSelected ) + " minutes" , TextToSpeech.QUEUE_FLUSH,null,null);
 
                 countdowntimer.start();
 
@@ -61,8 +91,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         });
 
 
-        engine = new TextToSpeech(this, this);
-            engine.setLanguage(Locale.UK);
+
 
 
     }
@@ -108,6 +137,43 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     }
 
+    private void checkForAnnouncement(int progress)
+    {
+
+        //Minute Check
+        if ((progress % 60) == 0) {
+            int iMinutes = 0;
+            String sMin = "minutes";
+
+            iMinutes   = progress /60;
+            if (iMinutes  ==1)
+                sMin="minute";
+
+            if (engine!=null) {
+                engine.speak("Starting in " +  iMinutes   + " " + sMin, TextToSpeech.QUEUE_FLUSH,null,null);
+            }
+        }
+        //30 seconds left Check
+        if (progress==30) {
+            if (engine!=null) {
+                engine.speak("Thirty seconds until we start", TextToSpeech.QUEUE_FLUSH,null,null);
+            }
+        }
+        //10 seconds left Check
+        if (progress==10) {
+            if (engine!=null) {
+                engine.speak("Ten seconds!", TextToSpeech.QUEUE_FLUSH,null,null);
+            }
+        }
+
+
+        if ( (progress==3) || (progress==2)  || (progress==1))  {
+            if (engine!=null) {
+                engine.speak(progress + "", TextToSpeech.QUEUE_FLUSH,null,null);
+            }
+        }
+
+    }
 
     public class CountDownTimerClass extends CountDownTimer {
 
@@ -121,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         public void onTick(long millisUntilFinished) {
 
             int progress = (int) (millisUntilFinished / 1000);
-
+            checkForAnnouncement(progress);
             textview.setText(Integer.toString(progress));
 
         }
@@ -129,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         @Override
         public void onFinish() {
             startRecording();
-            textview.setText(" Count Down Finish ");
+           // textview.setText(" Count Down Finish ");
 
         }
     }

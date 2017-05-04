@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsActivity = new Intent( getApplicationContext(), SettingsActivity.class);
+            startActivity(settingsActivity);
             return true;
         }
 
@@ -188,7 +190,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             int progress = (int) (millisUntilFinished / 1000);
             checkForAnnouncement(progress);
-            textview.setText(Integer.toString(progress));
+            //textview.setText(Integer.toString(progress));
+            textview.setText("Counting down..");
+            if ( (progress % 2) ==0) {
+                textview.setText("");
+            }
 
         }
 

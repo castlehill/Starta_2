@@ -2,9 +2,12 @@ package com.chs.starta;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,18 +25,36 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
 
     private Button b;
+    private Button bStop;
     private Context c;
     private TextView textview;
     private TextToSpeech  engine=null;
+    boolean bVoiceEnabled=true;
+    private Vibrator myVib;
 
 //NumberPicker np =null;
   //  NumberPicker numberPicker = null;
     com.shawnlin.numberpicker.NumberPicker numberPicker=null;
     CountDownTimer countdowntimer;
 
+@Override
+    protected void onResume()
+{
+
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    bVoiceEnabled = sharedPreferences.getBoolean("voice_enabled", true);
+
+    super.onResume();
+
+}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        bVoiceEnabled = sharedPreferences.getBoolean("voice_enabled", true);
+        myVib = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,9 +90,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                bStop.setAlpha(1f);
+                bStop.setClickable(true);
+
                 if (countdowntimer!=null) {
                     countdowntimer.cancel();
                 }
+                myVib.vibrate(50);
 
                 int iMills = 10000;
                 //iMills = Integer.parseInt( textview.getText().toString()) * 1000;
@@ -82,7 +107,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 countdowntimer = new CountDownTimerClass(iMills , 1000);
 
-                engine.speak("Countdown set for " +  (iSelected ) + " minutes" , TextToSpeech.QUEUE_FLUSH,null,null);
+                if (bVoiceEnabled)
+                    engine.speak("Countdown set for " +  (iSelected ) + " minutes" , TextToSpeech.QUEUE_FLUSH,null,null);
 
                 countdowntimer.start();
 
@@ -91,6 +117,24 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         });
 
 
+        bStop = (Button) findViewById(R.id.mybutton_stop);
+        bStop.setAlpha(.5f);
+        bStop.setClickable(false);
+        bStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //cancel the timer
+                if (countdowntimer !=null) {
+                    countdowntimer.cancel();
+                }
+                if (bVoiceEnabled)
+                    engine.speak("Countdown cancelled!" , TextToSpeech.QUEUE_FLUSH,null,null);
+
+
+                bStop.setAlpha(1);
+                bStop.setClickable(false);
+            }
+        });
 
 
 
@@ -99,8 +143,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private void startRecording() {
         //call out to app
-        if (engine!=null) {
-        engine.speak("Recording started!", TextToSpeech.QUEUE_FLUSH,null,null);
+        if (bVoiceEnabled) {
+            if (engine != null) {
+                engine.speak("Recording started!", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
         }
         Intent intent = new Intent(Intent.ACTION_RUN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -151,25 +197,25 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             if (iMinutes  ==1)
                 sMin="minute";
 
-            if (engine!=null) {
+            if ((engine!=null) && (bVoiceEnabled)) {
                 engine.speak("Starting in " +  iMinutes   + " " + sMin, TextToSpeech.QUEUE_FLUSH,null,null);
             }
         }
         //30 seconds left Check
-        if (progress==30) {
+        if ((progress==30) && (bVoiceEnabled)) {
             if (engine!=null) {
                 engine.speak("Thirty seconds until we start", TextToSpeech.QUEUE_FLUSH,null,null);
             }
         }
         //10 seconds left Check
-        if (progress==10) {
+        if ((progress==10) && (bVoiceEnabled)){
             if (engine!=null) {
                 engine.speak("Ten seconds!", TextToSpeech.QUEUE_FLUSH,null,null);
             }
         }
 
 
-        if ( (progress==3) || (progress==2)  || (progress==1))  {
+        if (( (progress==3) || (progress==2)  || (progress==1)) && (bVoiceEnabled)) {
             if (engine!=null) {
                 engine.speak(progress + "", TextToSpeech.QUEUE_FLUSH,null,null);
             }

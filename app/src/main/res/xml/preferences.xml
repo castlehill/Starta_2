@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Vocal Features"
+        android:key="voice_category">
+
+        <CheckBoxPreference
+            android:key="voice_enabled"
+            android:summary="Enable or disable voice"
+            android:title="Voice enabled"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Your Info"
+        android:key="personal_category">
+
+
+        <EditTextPreference
+            android:id="@+id/pref_full_name"
+            android:key="pref_full_name"
+            android:title="Name"
+            android:summary="Enter Your Name"
+            android:dialogTitle="Your Name"
+            android:dialogMessage="Enter Your Name"
+
+            android:inputType="textCapWords"/>
+
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
